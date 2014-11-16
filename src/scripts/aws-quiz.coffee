@@ -46,22 +46,25 @@ module.exports = (robot) ->
   q = {}
 
   robot.router.get '/aws-quiz/:id', (req, res) ->
-    res.file req.params.id + '.svg'
+    path = require 'path'
+    res.sendfile path.resolve(__dirname, '../../logos/', req.params.id)
 
-  robot.respond /aws-quiz$/i, (res) ->
-    quiz = res.random QUIZ
-    q[res.envelope.user.id] = quiz
-    setTimeout ->
-      q[res.envelope.user.id] = null
-      res.send BASE_URL + '/aws-quiz/' + quiz.id + '.svg\nX:' + quiz.name
-    , 30000
-    res.send BASE_URL + '/aws-quiz/' + quiz.id + '.svg'
-
-  robot.respond /(.+)/, (res) ->
-    quiz = q[res.envelope.user.id]
+  robot.hear /(.+)/i, (res) ->
+    { quiz, timerId } = q[res.envelope.user.id] ? {}
     return unless quiz
     name = res.match[1]
+    return unless name?
+    clearTimeout(timerId)
     if quiz.name.match(new RegExp(name, 'i'))
       res.send BASE_URL + '/aws-quiz/' + quiz.id + '.svg\nO:' + quiz.name
     else
       res.send BASE_URL + '/aws-quiz/' + quiz.id + '.svg\nX:' + quiz.name
+
+  robot.respond /aws-quiz$/i, (res) ->
+    quiz = res.random QUIZ
+    timerId = setTimeout ->
+      q[res.envelope.user.id] = null
+      res.send BASE_URL + '/aws-quiz/' + quiz.id + '.svg\nX:' + quiz.name
+    , 30000
+    q[res.envelope.user.id] = { quiz, timerId }
+    res.send BASE_URL + '/aws-quiz/' + quiz.id + '.svg'
