@@ -1,7 +1,7 @@
 {
   "name": "hubot-aws-quiz",
-  "version": "0.0.0",
-  "description": "A Hubot script that DESCRIPTION",
+  "version": "1.0.0",
+  "description": "A Hubot script that questions the AWS quiz",
   "main": "index.js",
   "scripts": {
     "build": "gulp",
